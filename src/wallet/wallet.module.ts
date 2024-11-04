@@ -5,9 +5,14 @@ import { WalletService } from './wallet.service';
 import { TronService } from 'src/tron/tron.service';
 import { ConfigService } from '@nestjs/config';
 import { WalletController } from './wallet.controller';
+import { UserService } from 'src/user/user.service';
+import { UserModule } from 'src/user/user.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Wallet.name, schema: WalletSchema }])],
+  imports: [
+    MongooseModule.forFeature([{ name: Wallet.name, schema: WalletSchema }]),
+    UserModule,
+  ],
   providers: [WalletService, TronService, ConfigService],
   controllers: [WalletController],
   exports: [WalletService],

@@ -1,10 +1,18 @@
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { TransactionService } from '../transaction/transaction.service';
-import { TransferTRC20Dto, TransferTRXDto } from 'src/transaction/transfer.dto';
+import {
+  TransferTRC20Dto,
+  TransferTRXDto,
+  TransferUSDTDto,
+} from 'src/transaction/transfer.dto';
+import { TronService } from './tron.service';
 
 @Controller('tron')
 export class TronController {
-  constructor(private readonly transactionService: TransactionService) {}
+  constructor(
+    private readonly transactionService: TransactionService,
+    private readonly tronService: TronService,
+  ) {}
 
   @Post('transfer/trx')
   async transferTRX(@Body() transferDto: TransferTRXDto) {
@@ -12,9 +20,7 @@ export class TronController {
       transferDto.fromAddress,
       transferDto.toAddress,
       transferDto.amount,
-      transferDto.privateKey,
-      transferDto.fromWalletId
-      // Note: In production, you should get the private key securely
+      transferDto.fromWalletId,
     );
   }
 
@@ -25,8 +31,7 @@ export class TronController {
       transferDto.fromAddress,
       transferDto.toAddress,
       transferDto.amount,
-      transferDto.privateKey
-      // Note: In production, you should get the private key securely
+      transferDto.privateKey,
     );
   }
 

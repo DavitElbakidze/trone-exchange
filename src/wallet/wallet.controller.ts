@@ -6,16 +6,10 @@ import {
   Param,
   HttpException,
   HttpStatus,
-  UseGuards,
 } from '@nestjs/common';
 import { WalletService } from './wallet.service';
 import { TronService } from '../tron/tron.service';
-
-interface TokenTransferDto {
-  tokenAddress: string;
-  toAddress: string;
-  amount: string;
-}
+import { ConfigService } from '@nestjs/config';
 
 interface ContractDeployDto {
   abi: any;
@@ -28,6 +22,7 @@ export class WalletController {
   constructor(
     private readonly walletService: WalletService,
     private readonly tronService: TronService,
+    private readonly configService: ConfigService,
   ) {}
 
   @Post('create')
@@ -37,8 +32,12 @@ export class WalletController {
 
   @Get(':id')
   async getWallet(@Param('id') id: string) {
-    
     return await this.walletService.getWallet(id);
+  }
+
+  @Get('usdt-balance/:address')
+  async getUSDTBalance(@Param('address') address: string) {
+    return await this.tronService.getUSDTBalance(address);
   }
 
   @Post(':id/update-balances')
@@ -57,11 +56,13 @@ export class WalletController {
   @Post('deploy-contract')
   async deployContract(@Body() deployDto: ContractDeployDto) {
     try {
+      const privateKey =
+        this.configService.getOrThrow<string>('TRON_PRIVATE_KEY');
       const result = await this.tronService.deployContract(
         deployDto.abi,
         deployDto.bytecode,
         deployDto.parameters,
-        process.env.TRON_PRIVATE_KEY, // In production, use secure key management
+        privateKey, // In production, use secure key management
       );
       return result;
     } catch (error) {
@@ -83,12 +84,14 @@ export class WalletController {
     },
   ) {
     try {
+      const privateKey =
+        this.configService.getOrThrow<string>('TRON_PRIVATE_KEY');
       const result = await this.tronService.deployTestToken(
         body.name,
         body.symbol,
         body.decimals,
         body.totalSupply,
-        process.env.TRON_PRIVATE_KEY, // In production, use secure key management
+        privateKey, // In production, use secure key management
       );
       return result;
     } catch (error) {
@@ -99,11 +102,13 @@ export class WalletController {
     }
   }
 
-
   @Get(':address/balance')
-  async getBalance(@Param('address') address: string) {
-      return {
-        balance: await this.tronService.getBalance(address)
-      };
+  async getTRXBalance(@Param('address') address: string) {
+    return {
+      balance: await this.tronService.getBalance(
+        'TG3XXyExBkPp9nzdajDZsozEu4BkaSJozs',
+        address,
+      ),
+    };
   }
 }

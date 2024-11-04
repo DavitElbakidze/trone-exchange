@@ -9,21 +9,19 @@ export class TransactionService {
   constructor(
     @InjectModel(Transaction.name) private transactionModel: Model<Transaction>,
     private readonly tronService: TronService,
-    
   ) {}
 
   async transferTRX(
     fromAddress: string,
     toAddress: string,
     amount: number,
-    privateKey: string,
     fromWalletId: string,
   ): Promise<any> {
     try {
       const transaction = await this.tronService.sendTransaction(
+        fromAddress,
         toAddress,
         amount,
-        privateKey,
       );
 
       const newTransaction = new this.transactionModel({
@@ -36,12 +34,42 @@ export class TransactionService {
         currency: 'TRX',
         fromWalletId,
       });
-
       await newTransaction.save();
       return transaction;
     } catch (error) {
       throw new Error(`Failed to transfer TRX: ${error.message}`);
     }
+  }
+
+  async transferUSDT(
+    fromAddress: string,
+    toAddress: string,
+    amount: number,
+    privateKey: string,
+    fromWalletId: string,
+  ) {
+    const transaction = await this.tronService.transferUSDT(
+      fromAddress,
+      toAddress,
+      amount,
+      privateKey,
+    );
+    console.log(fromAddress);
+
+    const newTransaction = new this.transactionModel({
+      fromAddress,
+      toAddress,
+      amount,
+      type: 'USDT',
+      hash: transaction.transactionId,
+      status: TransactionStatus.PENDING,
+      currency: 'USDT',
+      fromWalletId,
+    });
+    console.log(newTransaction);
+
+    await newTransaction.save();
+    return transaction;
   }
 
   async transferTRC20(
@@ -53,11 +81,8 @@ export class TransactionService {
   ): Promise<any> {
     try {
       const contract = await this.tronService.getContract(contractAddress);
-      
-      const transaction = await contract.transfer(
-        toAddress,
-        amount,
-      ).send({
+
+      const transaction = await contract.transfer(toAddress, amount).send({
         from: fromAddress,
         privateKey: privateKey,
       });

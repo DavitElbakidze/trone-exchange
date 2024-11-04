@@ -4,11 +4,16 @@ import { Document } from 'mongoose';
 export enum TransactionStatus {
   PENDING = 'PENDING',
   COMPLETED = 'COMPLETED',
-  FAILED = 'FAILED'
+  FAILED = 'FAILED',
+  CONFIRMED = 'CONFIRMED',
+  PROCESSING = 'PROCESSING',
 }
 
 @Schema({ timestamps: true })
 export class Transaction extends Document {
+  @Prop({ required: true })
+  hash: string;
+
   @Prop({ required: true })
   fromAddress: string;
 
@@ -19,23 +24,37 @@ export class Transaction extends Document {
   amount: number;
 
   @Prop({ required: true })
-  type: string;
-
-  @Prop({ required: true })
-  hash: string;
-
-  @Prop({ required: true })
-  currency: string;
-
-  @Prop({ required: true })
-  fromWalletId: string;
-
-  @Prop({ 
-    required: true,
-    enum: TransactionStatus,
-    default: TransactionStatus.PENDING 
-  })
   status: TransactionStatus;
+
+  @Prop({ default: 0 })
+  retryCount: number;
+
+  @Prop()
+  blockNumber?: number;
+
+  @Prop()
+  confirmations?: number;
+
+  @Prop()
+  energy_usage?: number;
+
+  @Prop()
+  energy_fee?: number;
+
+  @Prop()
+  net_fee?: number;
+
+  @Prop()
+  error?: string;
+
+  @Prop()
+  reorgDetected?: boolean;
+
+  @Prop()
+  createdAt: Date;
+
+  @Prop()
+  updatedAt: Date;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

@@ -1,5 +1,4 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
-
+import { IsString, IsNumber, IsOptional, IsNotEmpty } from 'class-validator';
 
 export class TransferTRXDto {
   @IsString()
@@ -32,5 +31,26 @@ export class TransferTRC20Dto {
   amount: string;
 
   @IsString()
-  privateKey:string
+  privateKey: string;
+}
+
+export class TransferUSDTDto {
+  @IsNotEmpty()
+  @IsString()
+  fromAddress: string;
+
+  @IsNotEmpty()
+  @IsString()
+  toAddress: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  amount: number;
+
+  @IsNotEmpty()
+  @IsString()
+  privateKey: string;
+
+  @IsString()
+  fromWalletId: string;
 }
